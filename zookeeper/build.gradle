@@ -1,7 +1,0 @@
-dependencies {
-    // ZooKeeper
-    compile 'org.apache.zookeeper:zookeeper'
-
-    // ZooKeeper JUnit
-    testCompile 'org.dmonix.junit:zookeeper-junit'
-}

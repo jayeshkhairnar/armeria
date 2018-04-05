@@ -1,0 +1,38 @@
+package com.ctrlshift.internal;
+
+import static java.util.Objects.requireNonNull;
+
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.handler.timeout.IdleStateHandler;
+
+public abstract class IdleTimeoutHandler extends IdleStateHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(IdleTimeoutHandler.class);
+
+    private final String name;
+
+    protected IdleTimeoutHandler(String name, long idleTimeoutMillis) {
+        super(0, 0, idleTimeoutMillis, TimeUnit.MILLISECONDS);
+        this.name = requireNonNull(name, "name");
+    }
+
+    @Override
+    protected final void channelIdle(ChannelHandlerContext ctx, IdleStateEvent evt) throws Exception {
+        if (!evt.isFirst()) {
+            return;
+        }
+
+        if (!hasRequestsInProgress(ctx)) {
+            logger.debug("{} Closing an idle {} connection", ctx.channel(), name);
+            ctx.channel().close();
+        }
+    }
+
+    protected abstract boolean hasRequestsInProgress(ChannelHandlerContext ctx);
+}

@@ -1,7 +1,0 @@
-dependencies {
-    testCompile project(':thrift')
-
-    // Zipkin
-    compile 'io.zipkin.brave:brave'
-    compile 'io.zipkin.java:zipkin'
-}

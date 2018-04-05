@@ -1,110 +1,48 @@
 buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.google.gradle:osdetector-gradle-plugin:1.4.0'
-        classpath 'io.spring.gradle:dependency-management-plugin:1.0.4.RELEASE'
-    }
+	ext {
+		springBootVersion = '2.0.0.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath 'com.google.gradle:osdetector-gradle-plugin:1.4.0'
+	}
 }
 
-allprojects {
-    repositories {
-        mavenCentral()
-    }
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'com.ctrlshift'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
 }
 
-ext {
-    // Set the artifactId of 'armeria-core' to 'armeria'.
-    artifactIdOverrides = [':core': rootProject.name]
-}
 
-apply from: "${rootDir}/gradle/scripts/build-flags.gradle"
-
-allprojects {
-    // Add common JVM options such as max memory and leak detection.
-    tasks.withType(JavaForkOptions) {
-        // Use larger heap when test coverage is enabled.
-        maxHeapSize = project.hasFlags('coverage') ? '384m' : '128m'
-
-        // Use verbose exception reporting for easier debugging.
-        systemProperties 'com.linecorp.armeria.verboseExceptions': 'true'
-
-        // Enable leak detection when '-Pleak' option is specified.
-        if (project.hasProperty('leak')) {
-            systemProperties 'io.netty.leakDetectionLevel': 'paranoid'
-        }
-    }
-}
-
-// Configure all Java projects
-configure(projectsWithFlags('java')) {
-
-    // Common dependencies
-    dependencies {
-        // All projects currently require ':core' (except itself)
-        if (project != project(':core')) {
-            compile project(':core')
-        }
-
-        // Testing utilities
-        testCompile project(':testing-internal')
-
-        // completable-futures
-        compile 'com.spotify:completable-futures'
-
-        // FastUtil
-        compile 'it.unimi.dsi:fastutil'
-
-        // Guava
-        compile 'com.google.guava:guava'
-
-        // JSR305
-        compile 'com.google.code.findbugs:jsr305'
-
-        // JCTools
-        compile 'org.jctools:jctools-core'
-
-        // Jetty ALPN support
-        compileOnly 'org.eclipse.jetty.alpn:alpn-api'
-
-        // Logging
-        compile 'org.slf4j:slf4j-api'
-        testCompile 'org.slf4j:jul-to-slf4j'
-        testRuntime 'ch.qos.logback:logback-classic'
-        ['jcl-over-slf4j', 'log4j-over-slf4j'].each {
-            testRuntime "org.slf4j:$it"
-        }
-
-        // Reflections
-        compile 'org.reflections:reflections'
-
-        // Test-time dependencies
-        testCompile 'com.google.guava:guava-testlib'
-        testCompile 'junit:junit'
-        testCompile 'net.javacrumbs.json-unit:json-unit'
-        testCompile 'net.javacrumbs.json-unit:json-unit-fluent'
-        testCompile 'org.awaitility:awaitility'
-        testRuntime 'org.checkerframework:checker-compat-qual' // Required by guava-testlib
-        testCompile 'org.assertj:assertj-core'
-        testCompile 'org.mockito:mockito-core'
-        testCompile 'org.apache.httpcomponents:httpclient'
-    }
-}
-
-// Configure the Javadoc tasks of all projects.
-allprojects {
-    tasks.withType(Javadoc) {
-        options {
-            // Groups
-            group 'Server', 'com.linecorp.armeria.server*'
-            group 'Client', 'com.linecorp.armeria.client*'
-            group 'Common', 'com.linecorp.armeria.common*'
-
-            // Exclude the machine-generated or internal-only classes
-            exclude '**/Tomcat*ProtocolHandler.java'
-            exclude '**/internal/**'
-            exclude '**/thrift/v1/**'
-        }
-    }
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter')
+	compile 'org.apache.zookeeper:zookeeper:3.4.0'
+	compile 'org.projectlombok:lombok:1.16.10'
+	compile 'com.google.guava:guava:24.0-jre'
+	compile 'org.slf4j:slf4j-api:1.7.25'
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+	compile group: 'com.linecorp.armeria', name: 'armeria-logback', version: '0.59.0', ext: 'pom'
+	compile group: 'io.netty', name: 'netty-all', version: '4.1.22.Final'
+	compile group: 'io.micrometer', name: 'micrometer-registry-prometheus', version: '1.0.2'
+	compile group: 'io.micrometer', name: 'micrometer-core', version: '1.0.2'
+	compile group: 'org.openid4java', name: 'openid4java', version: '1.0.0'
+	compile group: 'org.reactivestreams', name: 'reactive-streams', version: '1.0.2'
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.4'
+	compile group: 'org.jctools', name: 'jctools-core', version: '2.1.2'
+	compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
+	compile group: 'com.github.ben-manes.caffeine', name: 'caffeine', version: '2.6.2'
+	compile group: 'it.unimi.dsi', name: 'fastutil', version: '8.1.1'
+	
+	
 }
